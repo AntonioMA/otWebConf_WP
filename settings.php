@@ -5,32 +5,37 @@
  */
 
 define('OTWC_OPTIONS', 'OTWC__options');
+// Fields that we can customize...
 define('OTWC_BASE_URL', 'OTWC__cotorra_url');
 define('OTWC_PROJECT_UUID', 'OTWC__project_uuid');
+define('OTWC_MAIN_CONTACT_NAME', 'OTWC__main_contact_name');
+// End fields
+
+define('OTWC_PREFIX', 'OTWC_');
+define('OTWC_FIELD_CB', 'OTWC__field_cb');
+define('OTWC_SECTION_COTORRA_CB', 'OTWC__section_cotorra_cb');
+define('OTWC_SECTION_NAME', 'OTWC__section_cotorra');
 
 /**
  * custom option and settings
  */
 function OTWC__settings_init() {
   // register a new setting for "OTWC_" page
-  register_setting( 'OTWC_', 'OTWC__options' );
+  register_setting(OTWC_PREFIX, OTWC_OPTIONS);
 
   // register a new section in the "OTWC_" page
   add_settings_section(
-    'OTWC__section_cotorra',
-     __( 'TokBox\'s Cotorra Settings.', 'OTWC_' ),
-     'OTWC__section_cotorra_cb',
-     'OTWC_'
+    OTWC_SECTION_NAME,
+     __( 'TokBox\'s Cotorra Settings.', OTWC_PREFIX),
+     OTWC_SECTION_COTORRA_CB,
+     OTWC_PREFIX
   );
 
   // register a new field in the "OTWC__section_developers" section, inside the "OTWC_" page
   add_settings_field(
-   'OTWC__cotorra_url', // as of WP 4.6 this value is used only internally
-   // use $args' label_for to populate the id inside the callback
-   __('URL of the Cotorra server', 'OTWC_'),
-   'OTWC__field_cb',
-   'OTWC_',
-   'OTWC__section_cotorra',
+   OTWC_BASE_URL,
+   __('URL of the Cotorra server', OTWC_PREFIX),
+   OTWC_FIELD_CB, OTWC_PREFIX, OTWC_SECTION_NAME,
    [
      'label_for' => OTWC_BASE_URL,
       'input_type' => 'url',
@@ -40,12 +45,10 @@ function OTWC__settings_init() {
   );
 
   add_settings_field(
-   'OTWC__cotorra_project', // as of WP 4.6 this value is used only internally
+   OTWC_PROJECT_UUID, // as of WP 4.6 this value is used only internally
    // use $args' label_for to populate the id inside the callback
-   __('UUID of the cotorra project', 'OTWC_'),
-   'OTWC__field_cb',
-   'OTWC_',
-   'OTWC__section_cotorra',
+   __('UUID of the cotorra project', OTWC_PREFIX),
+   OTWC_FIELD_CB, OTWC_PREFIX, OTWC_SECTION_NAME,
    [
      'label_for' => OTWC_PROJECT_UUID,
       'input_type' => 'text',
@@ -53,6 +56,20 @@ function OTWC__settings_init() {
       'field_description' => 'Please enter the project UUID'
    ]
   );
+
+  add_settings_field(
+   OTWC_MAIN_CONTACT_NAME, // as of WP 4.6 this value is used only internally
+   // use $args' label_for to populate the id inside the callback
+   __('Main Contact Name', OTWC_PREFIX),
+   OTWC_FIELD_CB, OTWC_PREFIX, OTWC_SECTION_NAME,
+   [
+     'label_for' => OTWC_MAIN_CONTACT_NAME,
+      'input_type' => 'text',
+      'field_size' => 30,
+      'field_description' => 'Please enter the name of the main contact.'
+   ]
+  );
+
 }
 
 /**
@@ -67,7 +84,7 @@ function OTWC__settings_init() {
 // the values are defined at the add_settings_section() function.
 function OTWC__section_cotorra_cb( $args ) {
  ?>
- <p id="<?php echo esc_attr( $args['id'] ); ?>"><?php esc_html_e('Please fill in the base URL of your Cotorra server and the project UUID you wish to use:', 'OTWC_' ); ?></p>
+ <p id="<?php echo esc_attr( $args['id'] ); ?>"><?php esc_html_e('Please fill in the base URL of your Cotorra server and the project UUID you wish to use:', OTWC_PREFIX ); ?></p>
  <?php
 }
 
@@ -92,7 +109,7 @@ function OTWC__field_cb($args) {
    value="<?php echo esc_attr($options[$args['label_for']]); ?>"
  />
  <p class="description">
- <?php esc_html_e($args['field_description'], 'OTWC_' ); ?>
+ <?php esc_html_e($args['field_description'], OTWC_PREFIX ); ?>
  </p>
  <?php
 }
@@ -107,7 +124,7 @@ function OTWC__options_page() {
     'OpenTok Generic WebConferencing',
     'OpenTok Options',
     'manage_options',
-    'OTWC_',
+    OTWC_PREFIX,
     'OTWC__options_page_html'
   );
 }
@@ -128,7 +145,7 @@ function OTWC__options_page_html() {
    // wordpress will add the "settings-updated" $_GET parameter to the url
    if ( isset( $_GET['settings-updated'] ) ) {
      // add settings saved message with the class of "updated"
-     add_settings_error('OTWC__messages', 'OTWC__message', __( 'Settings Saved', 'OTWC_' ), 'updated');
+     add_settings_error('OTWC__messages', 'OTWC__message', __( 'Settings Saved', OTWC_PREFIX ), 'updated');
    }
 
    // show error/update messages
@@ -139,10 +156,10 @@ function OTWC__options_page_html() {
  <form action="options.php" method="post">
  <?php
    // output security fields for the registered setting "OTWC_"
-   settings_fields('OTWC_');
+   settings_fields(OTWC_PREFIX);
    // output setting sections and their fields
    // (sections are registered for "OTWC_", each field is registered to a specific section)
-   do_settings_sections('OTWC_');
+   do_settings_sections(OTWC_PREFIX);
    // output save settings button
    submit_button('Save Settings');
  ?>
