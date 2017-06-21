@@ -1,6 +1,13 @@
 <?php
 
 class WebConference {
+
+
+    function __construct($serverURL, $projectUUID) {
+        $this->serverURL = $serverURL;
+        $this->projectUUID = $projectUUID;
+    }
+
     /**
      * Method: POST, PUT, GET etc
      * Query: array("param" => "value") ==> index.php?param=value. That is, what goes on the
@@ -67,15 +74,15 @@ class WebConference {
      * Param $name: Name of the room owner
      * Param $hostId: Unique identifier of the room owner).
      */
-    public static function getHostUrl($name, $hostId = false, $recordCalls) {
+    public function getHostUrl($name, $hostId = false, $recordCalls) {
         if (!$hostId) {
             $hostId = uniqid('', true);
         }
         $hostId = $hostId . '||' . $name;
-        $result = self::putHost(WEBCONFERENCE_SERVER_ORIGIN, WEBCONFERENCE_PROJECT_UUID, $hostId, $recordCalls);
+        $result = self::putHost($this->serverURL, $this->projectUUID, $hostId, $recordCalls);
         $result = json_decode($result);
         $result->hostId = $hostId;
-        $result->url = WEBCONFERENCE_SERVER_ORIGIN . $result->url;
+        $result->url = $this->serverURL . $result->url;
         return $result;
     }
 
@@ -90,7 +97,7 @@ class WebConference {
      * Param $guestName: Name of the guest
      * Param $description: Description of the goal of the meeting
      */
-    public static function getAppointmentUrl($hostId, $guestId, $guestName, $description) {
+    public function getAppointmentUrl($hostId, $guestId, $guestName, $description) {
         $guestId = $guestId . '||' . $guestName;
         $descrip = $description;
         $now = time();
@@ -107,13 +114,14 @@ class WebConference {
             "startTime" => $startTime,
             "endTime" => $endTime
         );
-        $result = self::putAppointmentByProject(WEBCONFERENCE_SERVER_ORIGIN,
-                                                WEBCONFERENCE_PROJECT_UUID,
+        $result = self::putAppointmentByProject($this->serverURL,
+                                                $this->projectUUID,
                                                 $hostId,
                                                 uniqid('', true),
                                                 $appointmentData);
         $result = json_decode($result);
-        $result->url = WEBCONFERENCE_SERVER_ORIGIN . $result->url;
+        $result->url = $this->serverURL . $result->url;
         return $result;
     }
 }
+?>
