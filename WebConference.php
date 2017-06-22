@@ -19,37 +19,27 @@ class WebConference {
    * query string
    */
   protected static function APIRestCall($method, $url, $query = false, $data = false) {
-    $curl = curl_init();
-    switch ($method) {
-    case "POST":
-      curl_setopt($curl, CURLOPT_POST, 1);
-      break;
-    case "PUT":
-      curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PUT');
-      break;
-    case "DELETE":
-      curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
-      break;
-    default:
-      curls_setopt($curl, CURLOPT_GET, 1);
+    $request = new WP_Http;
+    $headers = null;
+
+    $params = array(
+      'method' => $method
+    );
+
+    if ($data) {
+      $params['headers'] = array(
+        'Content-Type' => 'application/json'
+      );
+      $params['body'] = $data;
     }
 
     if ($query) {
       $url = sprintf("%s?%s", $url, http_build_query($query));
     }
 
-    if ($data) {
-      curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-        'Content-Type: application/json'
-      ));
-      curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-    }
+    $result = $request->request($url, $params);
 
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    $result = curl_exec($curl);
-    curl_close($curl);
-    return $result;
+    return $result['body'];
   }
 
   protected static function putHost($base_url, $project_uuid, $host_ID, $record_calls) {
