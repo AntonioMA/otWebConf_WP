@@ -67,7 +67,7 @@ if (!class_exists('OTWC_Plugin')) {
       $old_options = $this->options;
       $this->options = get_option(OTWC_OPTIONS);
       write_log('build_web_conference called:');
-      write_log([$old_options, $this->options]);
+      //write_log([$old_options, $this->options]);
 
       if ($this->should_change($old_options, $this->options)) {
         write_log('build_web_conference: Creating new WebConference');
@@ -100,6 +100,23 @@ if (!class_exists('OTWC_Plugin')) {
       return $meta;
     }
 
+    /**
+    * returns the text of a very simple anchor starter to launch cotorra
+    */
+    private static function get_cotorra_anchor($url, $dom_element = false) {
+      if ($dom_element) {
+        $dom_element = "'$dom_element'";
+      } else {
+        $dom_element = 'null';
+      }
+      $url = "'$url'";
+      return "<a href=\"#\" onclick=\"return opentok.widget.start($url, $dom_element) && false;\">";
+    }
+
+    /**
+    * Note: The following two functions need some (or a whole lot) of love. Currently they work
+    * well only if the site is customized exactly as I have it!
+    */
     private function get_social_icon() {
       write_log('get_social_icon');
       // This sucks. You know it, I know it, everybody knows it.
@@ -110,7 +127,7 @@ if (!class_exists('OTWC_Plugin')) {
                                      'Unspecified question');
       return
          '<li id="menu-item-27" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-27">' .
-         ' <a href="' .  $site_cotorra_url->url .'" target="_blank">' .
+         self::get_cotorra_anchor($site_cotorra_url->url) .
          '  <span class="screen-reader-text">TokBox</span>' .
          '  <svg class="icon icon-skype" aria-hidden="true" role="img">' .
          '    <use href="#icon-skype" xlink:href="#icon-skype"></use>' .
@@ -119,21 +136,21 @@ if (!class_exists('OTWC_Plugin')) {
          '</li>';
     }
 
-    public function get_main_contact_url() {
+    private function get_main_contact_url() {
       $user = wp_get_current_user();
-      write_log('get_main_contact_url:');
-      write_log($user);
+      write_log('get_main_contact_url');
+      //write_log($user);
       $rooms = '';
       if (self::can_own_a_room($user)) {
         $rooms .=
-          '<li id="menu-item-21" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-21">' .
-          '  <a href="'. $this->site_url . '" target="_blank"> Load Main Contact Room </a>' .
+          '<li id="menu-item-224" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-224">' .
+          $this->get_cotorra_anchor($this->site_url) . ' Load Main Contact Room </a>' .
           '</li>';
         $user_room_url = get_user_meta($user->ID, self::ROOM_URL, true);
         if (!empty($user_room_url)) {
           $rooms .=
-          '<li id="menu-item-21" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-21">' .
-          '  <a href="'. $user_room_url . '" target="_blank"> Load Personal Contact Room </a>' .
+          '<li id="menu-item-221" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-221">' .
+          $this->get_cotorra_anchor($this->site_url) . ' Load Personal Contact Room </a>' .
           '</li>';
         }
       }
@@ -142,7 +159,7 @@ if (!class_exists('OTWC_Plugin')) {
 
     public function cotorra_menu_item($items, $args) {
       write_log('cotorra_menu_item');
-      write_log([$items, $args]);
+      //write_log([$items, $args]);
       if ($args->theme_location == 'social') {
         $items .= $this->get_social_icon();
       } else if ($args->theme_location == 'top') {
@@ -152,12 +169,25 @@ if (!class_exists('OTWC_Plugin')) {
       return $items;
     }
 
+    public function add_cotorra_client_script() {
+      write_log('add_cotorra_client_script: ' . $this->wc->server_url);
+      wp_enqueue_script('OTWC_client_script', $this->wc->server_url . '/js/opentokWidget.js');
+    }
+
+    public function cotorra_menu_objects($menu_objects, $args) {
+      write_log('cotorra_menu_objects:');
+      //write_log([$menu_objects, $args]);
+      return $menu_objects;
+    }
+
     private function __construct() {
       $this->options = self::DEFAULT_OPTIONS;
       add_action('activated_plugin', array($this, 'build_web_conference'));
       add_action('update_option_' . OTWC_OPTIONS, array($this, 'build_web_conference'));
       add_filter('insert_user_meta', array($this, 'user_meta_filter'), 10, 3);
       add_filter('wp_nav_menu_items', array($this, 'cotorra_menu_item'), 10, 2);
+      add_filter('wp_nav_menu_objects', array($this, 'cotorra_menu_objects'), 10, 2);
+      add_action('wp_enqueue_scripts', array($this, 'add_cotorra_client_script'));
       $this->build_web_conference();
     }
 
