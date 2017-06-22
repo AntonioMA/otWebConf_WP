@@ -38,6 +38,7 @@ if (!class_exists('OTWC_Plugin')) {
       OTWC_BASE_URL => 'https://ot-webconf.herokuapp.com',
       OTWC_PROJECT_UUID => '',
       OTWC_MAIN_CONTACT_NAME => 'Main Site Contact',
+      OTWC_ROOM_SELECTOR => ''
     ];
 
     const ROOM_URL = 'room_URL'; // Name for the meta key
@@ -103,14 +104,20 @@ if (!class_exists('OTWC_Plugin')) {
     /**
     * returns the text of a very simple anchor starter to launch cotorra
     */
-    private static function get_cotorra_anchor($url, $dom_element = false) {
-      if ($dom_element) {
-        $dom_element = "'$dom_element'";
+    private function get_cotorra_anchor($url, $dom_element = false) {
+      $onclick='';
+      if (empty($url)) {
+        $onclick = "opentok.widget.stop()";
       } else {
-        $dom_element = 'null';
+        $style = "style: 'position:fixed;top:0;left:0;bottom:0;right:0;z-index:100000'";
+        if (empty($dom_element)) {
+          $dom_element = $this->options[OTWC_ROOM_SELECTOR];
+        }
+        $options = "{ target: '$dom_element', $style}";
+        $url = "'$url'";
+        $onclick = "opentok.widget.start($url, $options)";
       }
-      $url = "'$url'";
-      return "<a href=\"#\" onclick=\"return opentok.widget.start($url, $dom_element) && false;\">";
+      return "<a href=\"#\" onclick=\"return $onclick && false;\">";
     }
 
     /**
@@ -127,7 +134,7 @@ if (!class_exists('OTWC_Plugin')) {
                                      'Unspecified question');
       return
          '<li id="menu-item-27" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-27">' .
-         self::get_cotorra_anchor($site_cotorra_url->url) .
+         $this->get_cotorra_anchor($site_cotorra_url->url) .
          '  <span class="screen-reader-text">TokBox</span>' .
          '  <svg class="icon icon-skype" aria-hidden="true" role="img">' .
          '    <use href="#icon-skype" xlink:href="#icon-skype"></use>' .
@@ -136,24 +143,30 @@ if (!class_exists('OTWC_Plugin')) {
          '</li>';
     }
 
+    const MAIN_MENU_HEADER =
+      '<li id="menu-item-224" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-224">';
+    const MAIN_CONTACT_LIT = 'Load Main Contact Room';
+    const PERSONAL_CONTACT_LIT = 'Load Personal Contact Room';
+    const CLOSE_CONTACT_ROOM = 'Close Video Contact Room';
+
+    private function get_main_menu_element($url, $description) {
+      return self::MAIN_MENU_HEADER .
+        $this->get_cotorra_anchor($url) . " $description </a> </li>";
+    }
+
     private function get_main_contact_url() {
       $user = wp_get_current_user();
       write_log('get_main_contact_url');
       //write_log($user);
       $rooms = '';
       if (self::can_own_a_room($user)) {
-        $rooms .=
-          '<li id="menu-item-224" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-224">' .
-          $this->get_cotorra_anchor($this->site_url) . ' Load Main Contact Room </a>' .
-          '</li>';
+        $rooms .= $this->get_main_menu_element($this->site_url, self::MAIN_CONTACT_LIT);
         $user_room_url = get_user_meta($user->ID, self::ROOM_URL, true);
         if (!empty($user_room_url)) {
-          $rooms .=
-          '<li id="menu-item-221" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-221">' .
-          $this->get_cotorra_anchor($this->site_url) . ' Load Personal Contact Room </a>' .
-          '</li>';
+          $rooms .= $this->get_main_menu_element($user_room_url, self::PERSONAL_CONTACT_LIT);
         }
       }
+      $rooms .= $this->get_main_menu_element(null, self::CLOSE_CONTACT_ROOM);
       return $rooms;
     }
 

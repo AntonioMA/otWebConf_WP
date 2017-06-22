@@ -9,12 +9,49 @@ define('OTWC_OPTIONS', 'OTWC__options');
 define('OTWC_BASE_URL', 'OTWC__cotorra_url');
 define('OTWC_PROJECT_UUID', 'OTWC__project_uuid');
 define('OTWC_MAIN_CONTACT_NAME', 'OTWC__main_contact_name');
+define('OTWC_ROOM_SELECTOR', 'OTWC__main_selector');
 // End fields
 
 define('OTWC_PREFIX', 'OTWC_');
 define('OTWC_FIELD_CB', 'OTWC__field_cb');
 define('OTWC_SECTION_COTORRA_CB', 'OTWC__section_cotorra_cb');
 define('OTWC_SECTION_NAME', 'OTWC__section_cotorra');
+
+
+const FIELDS = [
+  OTWC_BASE_URL => [
+    'label' => 'URL of the Cotorra server',
+    'params' =>[
+      'input_type' => 'url',
+      'field_size' => 40,
+      'field_description' => 'Please enter the URL of your Generic WebConference Server'
+   ]
+  ],
+  OTWC_PROJECT_UUID => [
+    'label' => 'UUID of the cotorra project',
+    'params' => [
+      'input_type' => 'text',
+      'field_size' => 85,
+      'field_description' => 'Please enter the project UUID'
+   ]
+  ],
+  OTWC_MAIN_CONTACT_NAME => [
+    'label' => 'Main Contact Name',
+    'params' => [
+      'input_type' => 'text',
+      'field_size' => 30,
+      'field_description' => 'Please enter the name of the main contact.'
+    ]
+  ],
+  OTWC_ROOM_SELECTOR => [
+    'label' => 'Conference room element',
+    'params' => [
+      'input_type' => 'text',
+      'field_size' => 30,
+      'field_description' => 'Please enter a query selector for the parent element of the video conference window.'
+    ]
+  ]
+];
 
 /**
  * custom option and settings
@@ -43,32 +80,14 @@ function OTWC__settings_init() {
       'field_description' => 'Please enter the URL of your Generic WebConference Server'
    ]
   );
-
-  add_settings_field(
-   OTWC_PROJECT_UUID, // as of WP 4.6 this value is used only internally
-   // use $args' label_for to populate the id inside the callback
-   __('UUID of the cotorra project', OTWC_PREFIX),
-   OTWC_FIELD_CB, OTWC_PREFIX, OTWC_SECTION_NAME,
-   [
-     'label_for' => OTWC_PROJECT_UUID,
-      'input_type' => 'text',
-      'field_size' => 85,
-      'field_description' => 'Please enter the project UUID'
-   ]
-  );
-
-  add_settings_field(
-   OTWC_MAIN_CONTACT_NAME, // as of WP 4.6 this value is used only internally
-   // use $args' label_for to populate the id inside the callback
-   __('Main Contact Name', OTWC_PREFIX),
-   OTWC_FIELD_CB, OTWC_PREFIX, OTWC_SECTION_NAME,
-   [
-     'label_for' => OTWC_MAIN_CONTACT_NAME,
-      'input_type' => 'text',
-      'field_size' => 30,
-      'field_description' => 'Please enter the name of the main contact.'
-   ]
-  );
+  foreach(FIELDS as $field => $field_config) {
+    $field_config['params']['label_for'] = $field;
+    add_settings_field($field,
+      __($field_config['label'], OTWC_PREFIX),
+      OTWC_FIELD_CB, OTWC_PREFIX, OTWC_SECTION_NAME,
+      $field_config['params']
+    );
+  }
 
 }
 
@@ -99,6 +118,9 @@ function OTWC__section_cotorra_cb( $args ) {
 function OTWC__field_cb($args) {
   // get the value of the setting we've registered with register_setting()
   $options = get_option(OTWC_OPTIONS);
+  if (!array_key_exists($args['label_for'], $options)) {
+    $options[$args['label_for']] = '';
+  }
   // output the field
  ?>
  <input
