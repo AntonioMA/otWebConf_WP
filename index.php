@@ -94,7 +94,7 @@ if (!class_exists('OTWC_Plugin')) {
     /**
     * returns the text of a very simple anchor starter to launch cotorra
     */
-    private function get_cotorra_anchor($url, $dom_element = false) {
+    private function get_cotorra_anchor($url, $title, $dom_element = false) {
       $onclick='';
       if (empty($url)) {
         $onclick = "opentok.widget.stop()";
@@ -103,7 +103,7 @@ if (!class_exists('OTWC_Plugin')) {
         if (empty($dom_element)) {
           $dom_element = $this->options[OTWC_ROOM_SELECTOR];
         }
-        $options = "{ target: '$dom_element', $style }";
+        $options = "{ target: '$dom_element', $style, title: '$title' }";
         $url = "'$url'";
         $onclick = "opentok.widget.start($url, $options)";
       }
@@ -124,7 +124,7 @@ if (!class_exists('OTWC_Plugin')) {
                                      'Unspecified question');
       return
          '<li id="menu-item-27" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-27">' .
-         $this->get_cotorra_anchor($site_cotorra_url->url) .
+         $this->get_cotorra_anchor($site_cotorra_url->url, 'Video Request') .
          '  <span class="screen-reader-text">TokBox</span>' .
          '  <svg class="icon icon-skype" aria-hidden="true" role="img">' .
          '    <use href="#icon-skype" xlink:href="#icon-skype"></use>' .
@@ -138,10 +138,12 @@ if (!class_exists('OTWC_Plugin')) {
     const MAIN_CONTACT_LIT = 'Load Main Contact Room';
     const PERSONAL_CONTACT_LIT = 'Load Personal Contact Room';
     const CLOSE_CONTACT_ROOM = 'Close Video Contact Room';
+    const PERSONAL_VC = 'Personal Video Room';
+    const MAIN_VC = 'Main Contact Video Room';
 
-    private function get_main_menu_element($url, $description) {
+    private function get_main_menu_element($url, $description, $title) {
       return self::MAIN_MENU_HEADER .
-        $this->get_cotorra_anchor($url) . " $description </a> </li>";
+        $this->get_cotorra_anchor($url, $title) . " $description </a> </li>";
     }
 
     private function get_main_contact_url() {
@@ -150,13 +152,15 @@ if (!class_exists('OTWC_Plugin')) {
       //write_log($user);
       $rooms = '';
       if (self::can_own_a_room($user)) {
-        $rooms .= $this->get_main_menu_element($this->site_url, self::MAIN_CONTACT_LIT);
+        $rooms .= $this->get_main_menu_element($this->site_url, self::MAIN_CONTACT_LIT,
+                                               self::MAIN_VC);
         $user_room_url = get_user_meta($user->ID, self::ROOM_URL, true);
         if (!empty($user_room_url)) {
-          $rooms .= $this->get_main_menu_element($user_room_url, self::PERSONAL_CONTACT_LIT);
+          $rooms .= $this->get_main_menu_element($user_room_url, self::PERSONAL_CONTACT_LIT,
+                                                 self::PERSONAL_VC);
         }
       }
-      $rooms .= $this->get_main_menu_element(null, self::CLOSE_CONTACT_ROOM);
+      $rooms .= $this->get_main_menu_element(null, self::CLOSE_CONTACT_ROOM, '');
       return $rooms;
     }
 
