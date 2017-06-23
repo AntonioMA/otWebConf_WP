@@ -178,7 +178,7 @@ if (!class_exists('OTWC_Plugin')) {
 
     public function add_cotorra_client_script() {
       write_log('add_cotorra_client_script: ' . $this->wc->server_url);
-      wp_enqueue_script('OTWC_client_script', $this->wc->server_url . '/js/opentokWidget.js');
+      wp_enqueue_script('OTWC_client_script', $this->wc->server_url . '/js/opentokWidgetV2.js');
     }
 
     public function cotorra_menu_objects($menu_objects, $args) {
