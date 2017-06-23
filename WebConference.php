@@ -1,4 +1,5 @@
 <?php
+include_once('error_log.php');
 
 class WebConference {
 
@@ -38,6 +39,14 @@ class WebConference {
     }
 
     $result = $request->request($url, $params);
+    if (is_a($result, 'WP_Error')) {
+      write_log($result);
+      $result = [
+        "body" => [
+          "url" => null
+        ]
+      ];
+    }
 
     return $result['body'];
   }

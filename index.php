@@ -18,18 +18,8 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 if (!class_exists('OTWC_Plugin')) {
   include_once('WebConference.php');
   include_once('settings.php');
+  include_once('error_log.php');
 
-  if (!function_exists('write_log')) {
-    function write_log ( $log )  {
-        if ( true === WP_DEBUG ) {
-            if ( is_array( $log ) || is_object( $log ) ) {
-                error_log( print_r( $log, true ) );
-            } else {
-                error_log( $log );
-            }
-        }
-    }
-  }
 
   class OTWC_Plugin {
      // A single capability that's checked to give a user his own room
