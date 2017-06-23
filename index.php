@@ -99,11 +99,11 @@ if (!class_exists('OTWC_Plugin')) {
       if (empty($url)) {
         $onclick = "opentok.widget.stop()";
       } else {
-        $style = "style: 'position:fixed;top:0;left:0;bottom:0;right:0;z-index:100000'";
+        $style = "style: ''"; // TO-DO? Make this customizable 
         if (empty($dom_element)) {
           $dom_element = $this->options[OTWC_ROOM_SELECTOR];
         }
-        $options = "{ target: '$dom_element', $style}";
+        $options = "{ target: '$dom_element', $style }";
         $url = "'$url'";
         $onclick = "opentok.widget.start($url, $options)";
       }
