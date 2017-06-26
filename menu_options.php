@@ -77,18 +77,63 @@ if (!class_exists('OTWC_Menu_Options')) {
       return $rooms;
     }
 
+    // $option = { literal: 'Title', type: menu_type_option }
+    private function add_menu_option($items, $option) {
+
+
+    }
+
+    private function add_menu_options($items, $menu) {
+      $menu_elems = '';
+      write_log('add_menu_options: ' . $menu);
+      $menu_options = $this->menus[$menu];
+      $user = wp_get_current_user();
+      foreach($menu_options as $option) {
+        if (call_user_func(OTWC_Constants::MENU_ITEM_CHECK[$option['type']], $user)) {
+          $menu_elems .= $this->add_menu_option($items, $option);
+        }
+      }
+      return $menu_elems;
+    }
+
     public function parse_menu_items($items, $args) {
+      $menu = $args->theme_location;
+      if (array_key_exists($menu, $this->menus)) {
+        $items .= $this->add_menu_options($items, $menu);
+      }
+      return $items;
+
+/*
       if ($args->theme_location == 'social') {
         $items .= $this->get_social_icon();
       } else if ($args->theme_location == 'top') {
         $items .= $this->get_main_contact_url();
       }
-
+*/
       return $items;
+    }
+
+    private function parse_menu_options() {
+      $menu_config = $this->options[OTWC_MENU_CONFIG];
+
+      $menus = explode(';',  $menu_config);
+      $this->menus = [];
+      foreach($menus as $option) {
+        $config = explode('|', $option);
+        $menu = $config[0];
+        $menu_item = explode(',', $config[1]);
+        $literal = $menu_item[0];
+        $type = $menu_item[1];
+        if (!array_key_exists($menu, $this->menus)) {
+          $this->menus[$menu] = [];
+        }
+        array_push($this->menus[$menu], ['literal' => $menu_item[0], 'type' => $menu_item[1]]);
+      }
     }
 
     public function __construct($options, $wc) {
       $this->options = $options;
+      $this->parse_menu_options();
       $this->wc = $wc;
     }
   }

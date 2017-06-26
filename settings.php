@@ -74,7 +74,7 @@ function OTWC__field_cb($args) {
   // get the value of the setting we've registered with register_setting()
   $options = get_option(OTWC_OPTIONS);
   if (!array_key_exists($args['label_for'], $options)) {
-    $options[$args['label_for']] = '';
+    $options[$args['label_for']] = OTWC_Constants::DEFAULT_OPTIONS[$args['label_for']];
   }
   // output the field
  ?>
