@@ -16,28 +16,18 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 // Note: this is hack-level code. Meaning this should be encapsulated, and check that we don't
 // fuck up somebody's else methods and remove cursing in comments and so on.
 if (!class_exists('OTWC_Plugin')) {
+  include_once('constants.php');
   include_once('WebConference.php');
   include_once('settings.php');
   include_once('error_log.php');
+  include_once('menu_options.php');
 
 
   class OTWC_Plugin {
-     // A single capability that's checked to give a user his own room
-    const HOST_CAPABILITY = 'delete_pages';
-    const DEFAULT_OPTIONS = [
-      OTWC_BASE_URL => 'https://ot-webconf.herokuapp.com',
-      OTWC_PROJECT_UUID => '',
-      OTWC_MAIN_CONTACT_NAME => 'Main Site Contact',
-      OTWC_ROOM_SELECTOR => ''
-    ];
-
-    const ROOM_URL = 'room_URL'; // Name for the meta key
-    const MAIN_CONTACT_ID = 'maincontact'; // Id of the main contact for the site
-
     public static function OTWC_activate_plugin() {
       $options = get_option(OTWC_OPTIONS);
       if (empty($options)) {
-        $options = self::DEFAULT_OPTIONS;
+        $options = OTWC_Constants::DEFAULT_OPTIONS;
         add_option(OTWC_OPTIONS, $options);
       }
     }
@@ -64,17 +54,15 @@ if (!class_exists('OTWC_Plugin')) {
         write_log('build_web_conference: Creating new WebConference');
         $this->wc =
           new WebConference($this->options[OTWC_BASE_URL], $this->options[OTWC_PROJECT_UUID]);
+        $this->menu_options = new OTWC_Menu_Options($this->options, $this->wc);
+
         // I could probably cache this...
         $this->site_url =
           $this->wc->getHostURL($this->options[OTWC_MAIN_CONTACT_NAME],
-                                self::MAIN_CONTACT_ID, false)->url;
+                                OTWC_Constants::MAIN_CONTACT_ID, false)->url;
       } else {
         write_log('build_web_conference: Keeping the old instance live');
       }
-    }
-
-    private static function can_own_a_room($user) {
-      return $user && $user->has_cap(self::HOST_CAPABILITY);
     }
 
     //add_user_meta( $user_id, '_level_of_awesomeness', $awesome_level);
@@ -82,97 +70,20 @@ if (!class_exists('OTWC_Plugin')) {
     public function user_meta_filter($meta, $user, $update = false) {
       write_log("user_meta_filter called with:");
       write_log([$meta, $user]);
-      if (self::can_own_a_room($user)) {
+      if (OTWC_Constants::can_own_a_room($user)) {
         // We will update the room url even if it already exists, in case the display name changed
         $room = $this->wc->getHostURL($user->data->display_name, $user->ID, false);
-        $meta[self::ROOM_URL] = $room->url;
+        $meta[OTWC_Constants::ROOM_URL] = $room->url;
         //add_user_meta($user_id, 'room_URL', $room->url);
       }
       return $meta;
     }
 
-    /**
-    * returns the text of a very simple anchor starter to launch cotorra
-    */
-    private function get_cotorra_anchor($url, $title, $dom_element = false) {
-      $onclick='';
-      if (empty($url)) {
-        $onclick = "opentok.widget.stop()";
-      } else {
-        $style = "style: ''"; // TO-DO? Make this customizable
-        if (empty($dom_element)) {
-          $dom_element = $this->options[OTWC_ROOM_SELECTOR];
-        }
-        $options = "{ target: '$dom_element', $style, title: '$title' }";
-        $url = "'$url'";
-        $onclick = "opentok.widget.start($url, $options)";
-      }
-      return "<a href=\"#\" onclick=\"return $onclick && false;\">";
-    }
-
-    /**
-    * Note: The following two functions need some (or a whole lot) of love. Currently they work
-    * well only if the site is customized exactly as I have it!
-    */
-    private function get_social_icon() {
-      write_log('get_social_icon');
-      // This sucks. You know it, I know it, everybody knows it.
-      // TO-DO: Check if it's a registered user and get his real name!
-      // We could also add a form here to get the contact information
-      $site_cotorra_url =
-        $this->wc->getAppointmentURL(self::MAIN_CONTACT_ID, uniqid('', true), 'Web User',
-                                     'Unspecified question');
-      return
-         '<li id="menu-item-27" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-27">' .
-         $this->get_cotorra_anchor($site_cotorra_url->url, 'Video Request') .
-         '  <span class="screen-reader-text">TokBox</span>' .
-         '  <svg class="icon icon-skype" aria-hidden="true" role="img">' .
-         '    <use href="#icon-skype" xlink:href="#icon-skype"></use>' .
-         '  </svg>' .
-         ' </a>'.
-         '</li>';
-    }
-
-    const MAIN_MENU_HEADER =
-      '<li id="menu-item-224" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-224">';
-    const MAIN_CONTACT_LIT = 'Load Main Contact Room';
-    const PERSONAL_CONTACT_LIT = 'Load Personal Contact Room';
-    const CLOSE_CONTACT_ROOM = 'Close Video Contact Room';
-    const PERSONAL_VC = 'Personal Video Room';
-    const MAIN_VC = 'Main Contact Video Room';
-
-    private function get_main_menu_element($url, $description, $title) {
-      return self::MAIN_MENU_HEADER .
-        $this->get_cotorra_anchor($url, $title) . " $description </a> </li>";
-    }
-
-    private function get_main_contact_url() {
-      $user = wp_get_current_user();
-      write_log('get_main_contact_url');
-      //write_log($user);
-      $rooms = '';
-      if (self::can_own_a_room($user)) {
-        $rooms .= $this->get_main_menu_element($this->site_url, self::MAIN_CONTACT_LIT,
-                                               self::MAIN_VC);
-        $user_room_url = get_user_meta($user->ID, self::ROOM_URL, true);
-        if (!empty($user_room_url)) {
-          $rooms .= $this->get_main_menu_element($user_room_url, self::PERSONAL_CONTACT_LIT,
-                                                 self::PERSONAL_VC);
-        }
-      }
-      return $rooms;
-    }
 
     public function cotorra_menu_item($items, $args) {
       write_log('cotorra_menu_item');
       //write_log([$items, $args]);
-      if ($args->theme_location == 'social') {
-        $items .= $this->get_social_icon();
-      } else if ($args->theme_location == 'top') {
-        $items .= $this->get_main_contact_url();
-      }
-
-      return $items;
+      return $this->menu_options->parse_menu_items($items, $args);
     }
 
     public function add_cotorra_client_script() {
@@ -187,7 +98,7 @@ if (!class_exists('OTWC_Plugin')) {
     }
 
     private function __construct() {
-      $this->options = self::DEFAULT_OPTIONS;
+      $this->options = OTWC_Constants::DEFAULT_OPTIONS;
       add_action('activated_plugin', array($this, 'build_web_conference'));
       add_action('update_option_' . OTWC_OPTIONS, array($this, 'build_web_conference'));
       add_filter('insert_user_meta', array($this, 'user_meta_filter'), 10, 3);
@@ -205,10 +116,7 @@ if (!class_exists('OTWC_Plugin')) {
       new OTWC_Plugin();
     }
 
-
   }
-
-
 
   OTWC_Plugin::init();
 
