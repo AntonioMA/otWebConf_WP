@@ -99,7 +99,7 @@ if (!class_exists('OTWC_Plugin')) {
       if (empty($url)) {
         $onclick = "opentok.widget.stop()";
       } else {
-        $style = "style: ''"; // TO-DO? Make this customizable 
+        $style = "style: ''"; // TO-DO? Make this customizable
         if (empty($dom_element)) {
           $dom_element = $this->options[OTWC_ROOM_SELECTOR];
         }
@@ -160,7 +160,6 @@ if (!class_exists('OTWC_Plugin')) {
                                                  self::PERSONAL_VC);
         }
       }
-      $rooms .= $this->get_main_menu_element(null, self::CLOSE_CONTACT_ROOM, '');
       return $rooms;
     }
 
