@@ -24,17 +24,6 @@ function OTWC__settings_init() {
   );
 
   // register a new field in the "OTWC__section_developers" section, inside the "OTWC_" page
-  add_settings_field(
-   OTWC_BASE_URL,
-   __('URL of the Cotorra server', OTWC_PREFIX),
-   OTWC_FIELD_CB, OTWC_PREFIX, OTWC_SECTION_NAME,
-   [
-     'label_for' => OTWC_BASE_URL,
-      'input_type' => 'url',
-      'field_size' => 40,
-      'field_description' => 'Please enter the URL of your Generic WebConference Server'
-   ]
-  );
   foreach(OTWC_Constants::FIELDS as $field => $field_config) {
     $field_config['params']['label_for'] = $field;
     add_settings_field($field,
@@ -62,8 +51,6 @@ function OTWC__section_cotorra_cb( $args ) {
  <?php
 }
 
-// pill field cb
-
 // field callbacks can accept an $args parameter, which is an array.
 // $args is defined at the add_settings_field() function.
 // wordpress has magic interaction with the following keys: label_for, class.
@@ -89,6 +76,10 @@ function OTWC__field_cb($args) {
  <?php esc_html_e($args['field_description'], OTWC_PREFIX ); ?>
  </p>
  <?php
+  if (array_key_exists('custom_generator', $args)) {
+    call_user_func($args['custom_generator'], $options[$args['label_for']], $args['label_for']);
+  }
+
 }
 
 /**

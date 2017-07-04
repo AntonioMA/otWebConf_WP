@@ -74,15 +74,10 @@ if (!class_exists('OTWC_Menu_Options')) {
       $user = wp_get_current_user();
 
       $items_arr = explode(htmlspecialchars_decode('</li>'), $items);
-      write_log('items_arr:');
-      write_log($items_arr);
 
       $regex = '%<li\s+id="([^"]+)"\s+class="([^"]+)"\s*>\s*\<a\s+href="([^"]+)"\s*>(.+)</a>%';
-      write_log('RE:' . $regex);
 
       if (preg_match($regex, $items_arr[0], $matches)) {
-        write_log('Matches: ' );
-        write_log($matches);
         $li_id_pattern = $matches[2];
         $li_class = $matches[2];
         $anchor = $matches[3];
@@ -107,48 +102,11 @@ if (!class_exists('OTWC_Menu_Options')) {
         $items .= $this->add_menu_options($items, $menu);
       }
       return $items;
-
-/*
-      if ($args->theme_location == 'social') {
-        $items .= $this->get_social_icon();
-      } else if ($args->theme_location == 'top') {
-        $items .= $this->get_main_contact_url();
-      }
-*/
-      return $items;
-    }
-
-    private function parse_menu_options() {
-      $menu_config = $this->options[OTWC_MENU_CONFIG];
-
-      $menus = explode(';',  $menu_config);
-      $this->menus = [];
-      foreach($menus as $option) {
-        $config = explode('|', $option);
-        $menu = $config[0];
-        $menu_item = explode(',', $config[1]);
-        $literal = $menu_item[0];
-        $type = $menu_item[1];
-        if (count($menu_item) > 2) {
-          $title = $menu_item[1];
-          $type = $menu_item[2];
-        } else {
-          $title = $literal;
-        }
-        if (!array_key_exists($menu, $this->menus)) {
-          $this->menus[$menu] = [];
-        }
-        array_push($this->menus[$menu], [
-          'type' => $type,
-          'literal' => $literal,
-          'title' => $title
-        ]);
-      }
     }
 
     public function __construct($options, $wc, $site_url) {
       $this->options = $options;
-      $this->parse_menu_options();
+      $this->menus = OTWC_Constants::parse_menu_options($this->options[OTWC_MENU_CONFIG]);
       $this->wc = $wc;
       $this->site_url = $site_url;
     }
