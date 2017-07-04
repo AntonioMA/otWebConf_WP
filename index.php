@@ -54,12 +54,12 @@ if (!class_exists('OTWC_Plugin')) {
         write_log('build_web_conference: Creating new WebConference');
         $this->wc =
           new WebConference($this->options[OTWC_BASE_URL], $this->options[OTWC_PROJECT_UUID]);
-        $this->menu_options = new OTWC_Menu_Options($this->options, $this->wc);
-
         // I could probably cache this...
         $this->site_url =
           $this->wc->getHostURL($this->options[OTWC_MAIN_CONTACT_NAME],
                                 OTWC_Constants::MAIN_CONTACT_ID, false)->url;
+        $this->menu_options = new OTWC_Menu_Options($this->options, $this->wc, $this->site_url);
+
       } else {
         write_log('build_web_conference: Keeping the old instance live');
       }

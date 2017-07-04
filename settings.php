@@ -122,7 +122,8 @@ function OTWC__options_page_html() {
    // wordpress will add the "settings-updated" $_GET parameter to the url
    if ( isset( $_GET['settings-updated'] ) ) {
      // add settings saved message with the class of "updated"
-     add_settings_error('OTWC__messages', 'OTWC__message', __( 'Settings Saved', OTWC_PREFIX ), 'updated');
+     add_settings_error('OTWC__messages', 'OTWC__message', __( 'Settings Saved', OTWC_PREFIX ),
+                        'updated');
    }
 
    // show error/update messages

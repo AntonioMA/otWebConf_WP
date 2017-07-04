@@ -27,6 +27,7 @@ if (!class_exists('OTWC_Constants')) {
       MENU_TYPE_GENERAL_ROOM => array('OTWC_Constants', 'can_own_a_room'),
       MENU_TYPE_PERSONAL_ROOM => array('OTWC_Constants', 'can_open_personal_room')
     ];
+
     const FIELDS = [
       OTWC_BASE_URL => [
         'label' => 'URL of the Cotorra server',
@@ -103,6 +104,14 @@ if (!class_exists('OTWC_Constants')) {
     public static function can_open_personal_room($user) {
       $user_room_url = get_user_meta($user->ID, OTWC_Constants::ROOM_URL, true);
       return !empty($user_room_url);
+    }
+
+    public static function generate_cotorra_href($type) {
+       return  call_user_func(self::MENU_ITEM_HREF_GENERATOR[$option['type']], $user);
+    }
+
+    public static function should_add_options($type, $user) {
+       return  call_user_func(self::MENU_ITEM_CHECK[$type], $user);
     }
 
   }
