@@ -72,7 +72,7 @@ if (!class_exists('OTWC_Constants')) {
         'label' => 'Menu customization',
         'params' => [
           'custom_generator' => array('OTWC_Constants', 'generate_menu_settings_layout'),
-          'input_type' => 'text',
+          'input_type' => 'hidden',
           'field_size' => 120,
           'field_description' =>
             'Please enter the menus where you want to add the options, and the customization for ' .
@@ -153,14 +153,32 @@ if (!class_exists('OTWC_Constants')) {
     // I can't say I'm a fan of PHP all things considered...
     public static function generate_menu_settings_layout($elem, $main_id) {
       $menus = self::parse_menu_options($elem);
-      write_log($elem);
-      write_log($menus);
       ?>
       <script>
       var __genValue = __genValue || {};
       __genValue['<?php echo esc_attr($main_id); ?>'] = {
         onchange: function() {
           console.log('onchange!');
+          var newValue = '';
+          var mainId = '<?php echo esc_attr($main_id); ?>';
+          var qsBase = '.' + mainId;
+          var table = document.getElementById(mainId + '__table');
+          var menus = table.querySelectorAll(qsBase + '__menu');
+          var types = table.querySelectorAll(qsBase + '__type');
+          var literals = table.querySelectorAll(qsBase + '__literal');
+          var titles = table.querySelectorAll(qsBase + '__title');
+          var separator = '';
+          for(var i = 0; i < menus.length; i++) {
+            var type= types[i].options[types[i].selectedIndex].value;
+            var menu = menus[i].value;
+            var literal = literals[i].value;
+            var title = titles[i].value;
+            newValue += separator + menu +'|' + literal + ',' + title + ',' + type;
+            separator = ';'
+          }
+          var origField = document.getElementById(mainId);
+          origField.value = newValue;
+          console.log('NV:', newValue);
 
         },
         genRow: function() {
