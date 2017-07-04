@@ -1,57 +1,12 @@
 <?php
+
+include_once('constants.php');
+
 /**
  * @internal never define functions inside callbacks.
  * these functions could be run multiple times; this would result in a fatal error.
  */
 
-define('OTWC_OPTIONS', 'OTWC__options');
-// Fields that we can customize...
-define('OTWC_BASE_URL', 'OTWC__cotorra_url');
-define('OTWC_PROJECT_UUID', 'OTWC__project_uuid');
-define('OTWC_MAIN_CONTACT_NAME', 'OTWC__main_contact_name');
-define('OTWC_ROOM_SELECTOR', 'OTWC__main_selector');
-// End fields
-
-define('OTWC_PREFIX', 'OTWC_');
-define('OTWC_FIELD_CB', 'OTWC__field_cb');
-define('OTWC_SECTION_COTORRA_CB', 'OTWC__section_cotorra_cb');
-define('OTWC_SECTION_NAME', 'OTWC__section_cotorra');
-
-
-const FIELDS = [
-  OTWC_BASE_URL => [
-    'label' => 'URL of the Cotorra server',
-    'params' =>[
-      'input_type' => 'url',
-      'field_size' => 40,
-      'field_description' => 'Please enter the URL of your Generic WebConference Server'
-   ]
-  ],
-  OTWC_PROJECT_UUID => [
-    'label' => 'UUID of the cotorra project',
-    'params' => [
-      'input_type' => 'text',
-      'field_size' => 85,
-      'field_description' => 'Please enter the project UUID'
-   ]
-  ],
-  OTWC_MAIN_CONTACT_NAME => [
-    'label' => 'Main Contact Name',
-    'params' => [
-      'input_type' => 'text',
-      'field_size' => 30,
-      'field_description' => 'Please enter the name of the main contact.'
-    ]
-  ],
-  OTWC_ROOM_SELECTOR => [
-    'label' => 'Conference room element',
-    'params' => [
-      'input_type' => 'text',
-      'field_size' => 30,
-      'field_description' => 'Please enter a query selector for the parent element of the video conference window.'
-    ]
-  ]
-];
 
 /**
  * custom option and settings
@@ -69,18 +24,7 @@ function OTWC__settings_init() {
   );
 
   // register a new field in the "OTWC__section_developers" section, inside the "OTWC_" page
-  add_settings_field(
-   OTWC_BASE_URL,
-   __('URL of the Cotorra server', OTWC_PREFIX),
-   OTWC_FIELD_CB, OTWC_PREFIX, OTWC_SECTION_NAME,
-   [
-     'label_for' => OTWC_BASE_URL,
-      'input_type' => 'url',
-      'field_size' => 40,
-      'field_description' => 'Please enter the URL of your Generic WebConference Server'
-   ]
-  );
-  foreach(FIELDS as $field => $field_config) {
+  foreach(OTWC_Constants::FIELDS as $field => $field_config) {
     $field_config['params']['label_for'] = $field;
     add_settings_field($field,
       __($field_config['label'], OTWC_PREFIX),
@@ -107,8 +51,6 @@ function OTWC__section_cotorra_cb( $args ) {
  <?php
 }
 
-// pill field cb
-
 // field callbacks can accept an $args parameter, which is an array.
 // $args is defined at the add_settings_field() function.
 // wordpress has magic interaction with the following keys: label_for, class.
@@ -119,7 +61,7 @@ function OTWC__field_cb($args) {
   // get the value of the setting we've registered with register_setting()
   $options = get_option(OTWC_OPTIONS);
   if (!array_key_exists($args['label_for'], $options)) {
-    $options[$args['label_for']] = '';
+    $options[$args['label_for']] = OTWC_Constants::DEFAULT_OPTIONS[$args['label_for']];
   }
   // output the field
  ?>
@@ -134,6 +76,10 @@ function OTWC__field_cb($args) {
  <?php esc_html_e($args['field_description'], OTWC_PREFIX ); ?>
  </p>
  <?php
+  if (array_key_exists('custom_generator', $args)) {
+    call_user_func($args['custom_generator'], $options[$args['label_for']], $args['label_for']);
+  }
+
 }
 
 /**
@@ -167,7 +113,8 @@ function OTWC__options_page_html() {
    // wordpress will add the "settings-updated" $_GET parameter to the url
    if ( isset( $_GET['settings-updated'] ) ) {
      // add settings saved message with the class of "updated"
-     add_settings_error('OTWC__messages', 'OTWC__message', __( 'Settings Saved', OTWC_PREFIX ), 'updated');
+     add_settings_error('OTWC__messages', 'OTWC__message', __( 'Settings Saved', OTWC_PREFIX ),
+                        'updated');
    }
 
    // show error/update messages
