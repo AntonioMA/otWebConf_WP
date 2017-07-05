@@ -127,9 +127,17 @@ class WebConference {
                                             $host_id,
                                             uniqid('', true),
                                             $appointment_data);
-    $result = json_decode($result);
-    $result->url = $this->server_url . $result->url;
-    return $result;
+    try {
+      $result = json_decode($result);
+      if (property_exists($result, 'url')) {
+        $result->url = $this->server_url . $result->url;
+        return $result;
+      } else {
+        return null;
+      }
+    } catch (Exception $e) {
+      return null;
+    }
   }
 }
 ?>

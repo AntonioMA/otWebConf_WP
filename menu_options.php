@@ -7,7 +7,7 @@ if (!class_exists('OTWC_Menu_Options')) {
 
     const MENU_ITEM_HREF_GENERATOR = [
       MENU_TYPE_GENERAL_CONTACT => 'get_appointment_url_for_server',
-      MENU_TYPE_PERSONAL_CONTACT => 'get_appointment_url_for_user',
+      MENU_TYPE_PERSONAL_CONTACT => 'get_appointment_url_for_users',
       MENU_TYPE_GENERAL_ROOM => 'get_room_url_for_server',
       MENU_TYPE_PERSONAL_ROOM => 'get_room_url_for_user'
     ];
@@ -24,10 +24,9 @@ if (!class_exists('OTWC_Menu_Options')) {
                                           'Web User', 'Unspecified question')->url;
     }
 
-    private function get_appointment_url_for_user($user) {
-      return
-        $this->wc->getAppointmentURL($user->ID, uniqid('', true),
-                                     'Web User', 'Unspecified question')->url;
+    private function get_appointment_url_for_users() {
+      // This just gets a list of all the users that have a room!
+      return plugins_url('content/html/personal_conf.html', __FILE__);
     }
 
     private function get_main_menu_element($type, $user, $description, $title) {
@@ -43,18 +42,12 @@ if (!class_exists('OTWC_Menu_Options')) {
     */
     public function get_cotorra_anchor($user, $type, $title, $dom_element = false) {
       $url = $this-> get_cotorra_url($type, $user);
-      $onclick='';
-      if (empty($url)) {
-        $onclick = "opentok.widget.stop()";
-      } else {
-        $style = "style: ''"; // TO-DO? Make this customizable
-        if (empty($dom_element)) {
-          $dom_element = $this->options[OTWC_ROOM_SELECTOR];
-        }
-        $options = "{ target: '$dom_element', $style, title: '$title' }";
-        $url = "'$url'";
-        $onclick = "opentok.widget.start($url, $options)";
+      if (empty($dom_element)) {
+        $dom_element = $this->options[OTWC_ROOM_SELECTOR];
       }
+      $style = ""; // TO-DO? Make this customizable
+      $onclick = "window.__otWebConf.startConference('$url', '$dom_element', '$style', '$title')";
+
       return "<a href=\"#\" onclick=\"return $onclick && false;\">";
     }
 

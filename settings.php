@@ -144,9 +144,11 @@ function OTWC__load_scripts($hook) {
     return;
   }
   $scr_path = plugins_url('content/js/settings.js', __FILE__);
+  $css_path = plugins_url('content/css/settings.css', __FILE__);
   write_log('OTWC_load_scripts: Adding script: ' . $scr_path . ' : ' . __FILE__);
 
   wp_enqueue_script('OTWC_settings.js', $scr_path);
+  wp_enqueue_style('OTWC_settings.css', $css_path);
 }
 
 /**

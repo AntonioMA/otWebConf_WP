@@ -74,7 +74,6 @@ if (!class_exists('OTWC_Plugin')) {
         // We will update the room url even if it already exists, in case the display name changed
         $room = $this->wc->getHostURL($user->data->display_name, $user->ID, false);
         $meta[OTWC_Constants::ROOM_URL] = $room->url;
-        //add_user_meta($user_id, 'room_URL', $room->url);
       }
       return $meta;
     }
@@ -82,19 +81,59 @@ if (!class_exists('OTWC_Plugin')) {
 
     public function cotorra_menu_item($items, $args) {
       write_log('cotorra_menu_item');
-      //write_log([$items, $args]);
       return $this->menu_options->parse_menu_items($items, $args);
     }
 
-    public function add_cotorra_client_script() {
-      write_log('add_cotorra_client_script: ' . $this->wc->server_url);
+    public function add_cotorra_client_script($hook) {
+      write_log('add_cotorra_client_script: ' . $this->wc->server_url . ':' . $hook);
       wp_enqueue_script('OTWC_client_script', $this->wc->server_url . '/js/opentokWidgetV2.js');
+      wp_enqueue_script('OTWC_setup_call_script',
+                        plugins_url('content/js/conference.js', __FILE__));
+      wp_enqueue_style('OTWC_setup_call_style',
+                       plugins_url('content/css/conference.css', __FILE__));
     }
 
     public function cotorra_menu_objects($menu_objects, $args) {
       write_log('cotorra_menu_objects:');
-      //write_log([$menu_objects, $args]);
       return $menu_objects;
+    }
+
+    public function add_custom_routes() {
+      write_log('add_custom_routes');
+      register_rest_route('otWebConf/v1', '/users', [
+        'methods' => 'GET',
+        'callback' => array($this, 'get_ot_user_list')
+      ]);
+    }
+
+    private function get_appointment_for_user($user) {
+      $appt_data = $this->wc->getAppointmentURL($user->ID, uniqid('', true),
+                                               'Web User', 'Unspecified question');
+      if ($appt_data != null) {
+        return $appt_data->url;
+      } else {
+        return null;
+      }
+    }
+
+    public function get_ot_user_list() {
+      write_log('get_ot_user_list');
+      $users = get_users([
+        'meta_query' => ['meta_key' => OTWC_Constants::ROOM_URL]
+        ]);
+      $filtered_users = [];
+      foreach($users as $user) {
+        $filtered_user = [
+          'ID' => $user->ID,
+          'display_name' => $user->display_name
+        ];
+        if (OTWC_Constants::can_own_a_room($user)) {
+          $filtered_user['appt_url'] = $this->get_appointment_for_user($user);
+          write_log('get_appointment_for_user: ' . $user->ID . ':' . $filtered_user['appt_url']);
+          array_push($filtered_users, $filtered_user);
+        }
+      }
+      return $filtered_users;
     }
 
     private function __construct() {
@@ -105,6 +144,7 @@ if (!class_exists('OTWC_Plugin')) {
       add_filter('wp_nav_menu_items', array($this, 'cotorra_menu_item'), 10, 2);
       add_filter('wp_nav_menu_objects', array($this, 'cotorra_menu_objects'), 10, 2);
       add_action('wp_enqueue_scripts', array($this, 'add_cotorra_client_script'));
+      add_action('rest_api_init', array($this, 'add_custom_routes'));
       $this->build_web_conference();
     }
 
