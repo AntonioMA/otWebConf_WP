@@ -155,38 +155,8 @@ if (!class_exists('OTWC_Constants')) {
       $menus = self::parse_menu_options($elem);
       ?>
       <script>
-      var __genValue = __genValue || {};
-      __genValue['<?php echo esc_attr($main_id); ?>'] = {
-        onchange: function() {
-          console.log('onchange!');
-          var newValue = '';
-          var mainId = '<?php echo esc_attr($main_id); ?>';
-          var qsBase = '.' + mainId;
-          var table = document.getElementById(mainId + '__table');
-          var menus = table.querySelectorAll(qsBase + '__menu');
-          var types = table.querySelectorAll(qsBase + '__type');
-          var literals = table.querySelectorAll(qsBase + '__literal');
-          var titles = table.querySelectorAll(qsBase + '__title');
-          var separator = '';
-          for(var i = 0; i < menus.length; i++) {
-            var type= types[i].options[types[i].selectedIndex].value;
-            var menu = menus[i].value;
-            var literal = literals[i].value;
-            var title = titles[i].value;
-            newValue += separator + menu +'|' + literal + ',' + title + ',' + type;
-            separator = ';'
-          }
-          var origField = document.getElementById(mainId);
-          origField.value = newValue;
-          console.log('NV:', newValue);
-
-        },
-        genRow: function() {
-          var row =
-            document.getElementById('<?php echo esc_attr($main_id); ?>__fakeRow').cloneNode(true);
-          document.getElementById('<?php echo esc_attr($main_id); ?>__table').appendChild(row);
-        }
-      };
+      window.__genValue && typeof window.__genValue.defineHandlers == 'function' &&
+        window.__genValue.defineHandlers('<?php echo esc_attr($main_id); ?>');
       </script>
       <table id="fakeTable" style="display:none">
       <?php self::generate_menu_settings_row($main_id . '__fakeRow', $main_id, '', [

@@ -138,13 +138,26 @@ function OTWC__options_page_html() {
 
 }
 
+function OTWC__load_scripts($hook) {
+  write_log('OTWC_load_scripts: ' . $hook);
+  if ($hook != 'toplevel_page_OTWC_') {
+    return;
+  }
+  $scr_path = plugins_url('content/js/settings.js', __FILE__);
+  write_log('OTWC_load_scripts: Adding script: ' . $scr_path . ' : ' . __FILE__);
+
+  wp_enqueue_script('OTWC_settings.js', $scr_path);
+}
+
 /**
  * register our OTWC__settings_init to the admin_init action hook
  */
-add_action( 'admin_init', 'OTWC__settings_init' );
+add_action('admin_init', 'OTWC__settings_init');
 
 /**
  * register our OTWC__options_page to the admin_menu action hook
  */
-add_action( 'admin_menu', 'OTWC__options_page' );
+add_action('admin_menu', 'OTWC__options_page');
+
+add_action('admin_enqueue_scripts', 'OTWC__load_scripts');
 
