@@ -66,3 +66,18 @@ body:before {
   background: #0099cc;
   color: #fff;
 }
+
+@media only screen and (max-width: 767px) {
+  body:before {
+    width: 155.925px;
+    height: 40.635px;
+  }
+
+  .list-header {
+    font-size: 2.2rem;
+  }
+
+  .contact-list li {
+    font: 200 1.5rem/1.5 Helvetica, Verdana, sans-serif;
+  }
+}
