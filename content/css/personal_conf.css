@@ -1,4 +1,68 @@
 /* This should hold the styles for the personal conference list window */
+
+html {
+  width: 100%;
+  height: 100%;
+  font-size: 10px;
+}
+
 body {
+  box-sizing: border-box;
   background-color: white;
+  font-family: Helvetica, Verdana, sans-serif;
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+body:before {
+  content: '';
+  display: block;
+  width: 207.9px;
+  height: 54.18px;
+  background-image: url(https://static.opentok.com/img/styleguide/tokbox-logo-horizontal.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.list-header {
+  width: 100%;
+  font-size: 2.8rem;
+  text-align: center;
+  color: #0099cc;
+  font-weight: 200;
+}
+
+.contact-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  width: auto;
+}
+
+.contact-list li {
+  font: 200 2.1rem/1.5 Helvetica, Verdana, sans-serif;
+  border-bottom: .5px solid #E6E6E6;
+}
+
+.contact-list li:last-child {
+  border: none;
+}
+
+.contact-list li a {
+  text-decoration: none;
+  color: #000;
+  display: block;
+  padding: 0 1rem;
+}
+
+.contact-list li a:hover {
+  background: #0099cc;
+  color: #fff;
 }
