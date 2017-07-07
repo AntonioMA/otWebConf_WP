@@ -1,1 +1,59 @@
 /* Add the CSS for the settings here */
+
+#OTWC__cotorra_url, #OTWC__project_uuid, #OTWC__main_contact_name, #OTWC__main_selector {
+  width: 100%;
+}
+
+#OTWC__menu_config__table {
+  border-spacing: 0;
+  margin-top: 10px;
+}
+
+#OTWC__menu_config__table tr:nth-child(odd) {
+  background-color: #D8D8D8;
+}
+
+#OTWC__menu_config__table tr:nth-child(even) {
+  background-color: #E6E6E6;
+}
+
+#OTWC__menu_config__table tr:first-child {
+  background-color: #23282d;
+}
+
+#OTWC__menu_config__table tr:first-child th {
+  color: #fff;
+  padding: 10px 0;
+}
+
+#OTWC__menu_config__table th {
+  text-align: center;
+}
+
+#OTWC__menu_config__table td {
+  padding: 10px 10px 7.5px 10px;
+}
+
+#OTWC__menu_config__table tr:nth-child(2) td {
+  padding-top: 10px;
+}
+
+#OTWC__menu_config__table + p input[type=button] {
+  background-color: #23282d;
+  color: #fff;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 13px;
+  line-height: 26px;
+  height: 28px;
+  margin: 0;
+  padding: 0 10px 1px;
+  cursor: pointer;
+  border-width: 1px;
+  border-style: solid;
+  -webkit-appearance: none;
+  border-radius: 3px;
+  white-space: nowrap;
+  box-sizing: border-box;
+  margin-top: 10px;
+}
